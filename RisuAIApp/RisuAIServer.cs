@@ -56,6 +56,7 @@ public class RisuAIServer {
                 "/api/remove" => controller.RemoveFile(),
                 "/api/list" => controller.ListFiles(),
                 "/api/write" => controller.WriteFile(),
+                "/bing" => controller.BingChat(),
                 _ => controller.GetFile()
             });
         } catch (Exception ex) {

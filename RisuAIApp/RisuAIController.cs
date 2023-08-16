@@ -1,6 +1,8 @@
 ﻿namespace RisuAIApp;
 using EmbedIO;
 
+using RisuAIApp.Models;
+
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -27,7 +29,8 @@ public partial struct RisuAIController {
     public string Auth => Request.Headers["risu-auth"] ?? string.Empty;
 
     private async Task<string> GetJson(string name) {
-        JsonDocument doc = await JsonDocument.ParseAsync(Request.InputStream);
+        using var stream = HttpContext.OpenRequestStream();
+        JsonDocument doc = await JsonDocument.ParseAsync(stream);
         if (doc.RootElement.TryGetProperty(name, out var prop)) {
             return prop.GetString();
         }
@@ -222,5 +225,38 @@ public partial struct RisuAIController {
         using var input = await FileSystem.OpenAppPackageFileAsync(url.TrimStart('/'));
         using var output = HttpContext.OpenResponseStream();
         await input.CopyToAsync(output);
+    }
+
+    public async Task BingChat() {
+        var HttpContext = this.HttpContext;
+        using var stream = HttpContext.OpenRequestStream();
+        var req = await JsonSerializer.DeserializeAsync<Models.Request>(stream);
+        if(req.Stream) {
+            await SendText("Stream not supported.");
+            return;
+        }
+
+        string input = Bing.MessagesToText(req.Messages);
+        string output = await Bing.SendAsync(input);
+        await SendText(output ?? "failed to fetch");
+
+        async Task SendText(string text) {
+            await HttpContext.SendDataAsync(
+                new Response() {
+                    Type = "chat.completion",
+                    Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    Usage = new() { Total = 0, Prompt = 0, Completion = 0, },
+                    Choices = new MessageResult[] {
+                    new MessageResult() {
+                        Index = 0,
+                        Message = new() {
+                            Role = Message.ROLE_ASSISTANT,
+                            Content = text,
+                        },
+                        Reason = "stop",
+                    }
+                }
+            });
+        }
     }
 }

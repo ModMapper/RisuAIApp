@@ -92,4 +92,8 @@
 		<PackageReference Include="EmbedIO" Version="3.5.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\PrometheusGPT\PrometheusAPI\PrometheusAPI.csproj" />
+	</ItemGroup>
 </Project>
