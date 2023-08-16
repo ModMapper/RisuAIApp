@@ -241,12 +241,11 @@ public partial struct RisuAIController {
         await SendText(output ?? "failed to fetch");
 
         async Task SendText(string text) {
-            await HttpContext.SendDataAsync(
-                new Response() {
-                    Type = "chat.completion",
-                    Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                    Usage = new() { Total = 0, Prompt = 0, Completion = 0, },
-                    Choices = new MessageResult[] {
+            Response res = new() {
+                Type = "chat.completion",
+                Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                Usage = new() { Total = 1, Prompt = 1, Completion = 1, },
+                Choices = new MessageResult[] {
                     new MessageResult() {
                         Index = 0,
                         Message = new() {
@@ -256,7 +255,10 @@ public partial struct RisuAIController {
                         Reason = "stop",
                     }
                 }
-            });
+            };
+            HttpContext.Response.ContentType = MimeType.Json;
+            using var stream = HttpContext.OpenResponseStream();
+            await JsonSerializer.SerializeAsync(stream, res);
         }
     }
 }

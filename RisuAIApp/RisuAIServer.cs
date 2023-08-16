@@ -43,7 +43,7 @@ public class RisuAIServer {
     }
 
     private async Task HttpHandler(IHttpContext context) {
-        string url = context.Request.Url.AbsolutePath;
+        string url = context.Request.Url.AbsolutePath.ToLower();
         RisuAIController controller = new(this, context);
         try {
             await (url switch {
@@ -56,7 +56,7 @@ public class RisuAIServer {
                 "/api/remove" => controller.RemoveFile(),
                 "/api/list" => controller.ListFiles(),
                 "/api/write" => controller.WriteFile(),
-                "/bing" => controller.BingChat(),
+                "/bing/v1/chat/completions" => controller.BingChat(),
                 _ => controller.GetFile()
             });
         } catch (Exception ex) {

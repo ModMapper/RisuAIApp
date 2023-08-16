@@ -18,7 +18,7 @@ public class Bing
         {
             Conversation conv = await Conversation.CreateAsync();
             ChatResult result = await conv.ChatAsync(chat);
-            await result.WaitAsync();
+            await result.GetMessagesAsync();
             return result.SucessfulText;
         }
         catch
