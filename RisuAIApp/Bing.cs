@@ -29,6 +29,7 @@ public class Bing
 
     public static string MessagesToText(IEnumerable<Message> messages) {
         StringBuilder sb = new();
+        sb.AppendLine("Follow the instructions and fill out the answers from the assistants.");
         foreach(var msg in messages) {
             switch(msg.Role) {
                 case Message.ROLE_USER:
